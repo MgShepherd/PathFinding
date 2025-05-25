@@ -1,1 +1,1 @@
-This is an example maze file
+1,10
