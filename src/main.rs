@@ -4,6 +4,7 @@ pub mod file_processor;
 
 fn main() -> Result<(), ProcessFileError> {
     let file_name = "examples/maze.txt";
-    file_processor::process_file(file_name)?;
+    let maze = file_processor::process_file(file_name)?;
+    println!("{}", maze);
     Ok(())
 }

@@ -13,7 +13,25 @@ pub enum ProcessFileError {
     MazeGenerationError(MazeFormatError)
 }
 
-pub struct Maze;
+#[derive(Debug)]
+pub struct Maze {
+    width: usize,
+    height: usize,
+    grid: Box<[u16]>
+}
+
+impl std::fmt::Display for Maze {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Width: {}, Height: {}", self.width, self.height)?;
+        for y in 0..self.height {
+            for x in 0..self.width {
+                write!(f, "{}", self.grid[(y * self.width) + x])?;
+            }
+            writeln!(f, "")?;
+        }
+        writeln!(f, "")
+    }
+}
 
 impl std::fmt::Display for MazeFormatError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -51,10 +69,7 @@ impl From<MazeFormatError> for ProcessFileError {
 }
 
 pub fn process_file(file_path: &str) -> Result<Maze, ProcessFileError> {
-    println!("Processing file");
-
     let file_contents = fs::read_to_string(file_path).map_err(|e| ProcessFileError::FileReadError(file_path.to_owned(), e))?;
-    println!("Contents of file were: {}", file_contents);
     let maze = convert_to_maze(&file_contents)?;
     Ok(maze)
 }
@@ -65,9 +80,14 @@ fn convert_to_maze(input: &str) -> Result<Maze, MazeFormatError> {
     let dimension_str = lines.next().ok_or(MazeFormatError::EmptyFileError)?;
     let (width, height) = read_dimensions(dimension_str)?;
 
-    println!("Maze Width: {}, Maze Height: {}", width, height);
+    let grid_vec: Vec<u16> = vec![0; width * height];
 
-    Ok(Maze)
+    let maze = Maze {
+        width,
+        height,
+        grid: grid_vec.into_boxed_slice()
+    };
+    Ok(maze)
 }
 
 fn read_dimensions(dimension_str: &str) -> Result<(usize, usize), MazeFormatError> {
